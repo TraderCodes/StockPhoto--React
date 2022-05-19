@@ -14,6 +14,7 @@ function App() {
    const [page, setPage] = useState(1);
    const [query, setQuery] = useState('');
    const mounted = useRef(false);
+   const [newImage, setNewImage] = useState(false);
    // fetch api
    const fetchImage = async () => {
       setLoading(true);
@@ -42,9 +43,10 @@ function App() {
             }
          });
          //  console.log(data);
+         setNewImage(false);
          setLoading(false);
       } catch (error) {
-         console.log(error);
+         setNewImage(false);
          setLoading(false);
       }
    };
@@ -56,6 +58,24 @@ function App() {
          mounted.current = true;
          return;
       }
+      if (!newImage) return;
+      if (loading) return;
+      setPage((oldPage) => oldPage + 1);
+   }, [newImage]);
+   const event = () => {
+      if (
+         window.innerHeight + window.scrollY >=
+         document.body.scrollHeight - 2
+      ) {
+         setNewImage(true);
+      }
+   };
+   useEffect(() => {
+      window.addEventListener('scroll', event);
+
+      return () => {
+         window.removeEventListener('scroll', event);
+      };
    }, []);
 
    //  handleSubmit
