@@ -32,6 +32,24 @@ function App() {
    useEffect(() => {
       fetchImage();
    }, []);
+   useEffect(() => {
+      const event = window.addEventListener('scroll', () => {
+         // if scroll plus the height of the window is bigger than the total scroll distance
+         //  which is the end of the document
+         if (
+            !loading &&
+            window.innerHeight + window.scrollY >= document.body.scrollHeight
+         ) {
+         }
+         console.log(`${window.innerHeight} height`);
+         console.log(`${window.scrollY} Y`);
+         console.log(`${document.body.scrollHeight} SCROLL height`);
+      });
+
+      return () => {
+         window.removeEventListener('scroll', event);
+      };
+   }, []);
 
    const handleSubmit = (e) => {
       e.preventDefault();
