@@ -11,17 +11,35 @@ const searchUrl = `https://api.unsplash.com/search/photos/`;
 function App() {
    const [loading, setLoading] = useState(false);
    const [photos, setPhotos] = useState([]);
-
+   const [page, setPage] = useState(0);
+   const [query, setQuery] = useState('');
    // fetch api
    const fetchImage = async () => {
       setLoading(true);
       let url;
+      // set up amount of page to show
+      const urlPAGE = `&page=${page}`;
       // setting url for different usecase
-      url = `${mainUrl}${clientID}`;
+      // set up search entry
+      const urlQuery = `&query=${query}`;
+      url = `${mainUrl}${clientID}${urlPAGE}`;
+      if (query) {
+         url = `${searchUrl}${clientID}${urlPAGE}${urlQuery}`;
+      } else {
+         url = `${mainUrl}${clientID}${urlPAGE}`;
+      }
       try {
          const response = await fetch(url);
          const data = await response.json();
-         setPhotos(data);
+         setPhotos((oldPhotos) => {
+            if (query && page === 1) {
+               return data.results;
+            } else if (query) {
+               return [...oldPhotos, ...data.results];
+            } else {
+               return [...oldPhotos, ...data];
+            }
+         });
          console.log(data);
          setLoading(false);
       } catch (error) {
@@ -31,7 +49,7 @@ function App() {
    };
    useEffect(() => {
       fetchImage();
-   }, []);
+   }, [page]);
    useEffect(() => {
       const event = window.addEventListener('scroll', () => {
          // if scroll plus the height of the window is bigger than the total scroll distance
@@ -40,6 +58,9 @@ function App() {
             !loading &&
             window.innerHeight + window.scrollY >= document.body.scrollHeight
          ) {
+            setPage((oldpage) => {
+               return oldpage + 1;
+            });
          }
          console.log(`${window.innerHeight} height`);
          console.log(`${window.scrollY} Y`);
@@ -51,8 +72,12 @@ function App() {
       };
    }, []);
 
+   //  handleSubmit
    const handleSubmit = (e) => {
       e.preventDefault();
+      // so everytime when submit it fetch and start with page one
+      setPage(1)
+
    };
 
    return (
@@ -64,6 +89,10 @@ function App() {
                   className="form-input"
                   type="text"
                   placeholder="Search..."
+                  // setup input field
+                  value={query}
+                  // set onchange everytime user enter value
+                  onChange={(e) => setQuery(e.target.value)}
                />
                <button className="submit-btn" onClick={handleSubmit}>
                   <FaSearch />
